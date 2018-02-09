@@ -6,7 +6,7 @@ var redisClient = redis.createClient();
 
 /* GET users listing. */
 router.get('/count', function(req, res, next) {
-    var tagName = req.cookie.tagName;
+    var tagName = req.cookies.tagName;
 
     redisClient.select(2, function(err) {
       if (err){
