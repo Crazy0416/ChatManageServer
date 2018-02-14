@@ -5,18 +5,21 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var request = require('request');
-var serverConfig = require('./config/ChatManage');
+var config = require('./config/chatManageServer');
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
 var redis = require('redis');
-redis.createClient();
+redis.createClient({
+    host: config.redis['host'],
+    port: config.redis['port']
+});
 
 var index = require('./routes/index');
 var chatserver = require('./routes/chatserver');
 
 var app = express();
 
-exports.chatServerList = serverConfig.healthCheck;
+exports.chatServerList = config.healthCheck;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -40,6 +43,9 @@ app.use(function(req, res, next) {
   next(err);
 });
 
+// Cache-Control : no-cache
+app.disable('etag');
+
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
@@ -61,7 +67,7 @@ function healthCheck(opt, ip)
           if(err) {
             reject(ip);
           } else {
-            if(res.headers['http_1_1'] === 'ok' && (res.statusCode === 200 || res.statusCode === 304)) {
+            if(res.statusCode === 200 || res.statusCode === 304) {
               resolve(ip);
             } else {
               reject(ip);
@@ -72,7 +78,7 @@ function healthCheck(opt, ip)
 
     p.then(function(ip)
     {
-        console.log('헬스체크 성공 : ' + ip);
+        console.log('정상 서버 : ' + ip);
         exports.chatServerList[ip] = 1;
     }).catch(function(ip)
     {
@@ -87,21 +93,21 @@ function healthCheck(opt, ip)
 eventEmitter.on('healthCheck', function() {
     setTimeout(function() {
         var promises = [];
-        var length = Object.keys(serverConfig.healthCheck).length;
+        var length = Object.keys(config.healthCheck).length;
         for (var i = 0 ; i < length; i++)
         {
-          var ip = Object.keys(serverConfig.healthCheck)[i];
+          var ip = Object.keys(config.healthCheck)[i];
           var option= {
-              url: 'http://' + ip + '/healthcheck',
-              method: 'GET'
+              url: 'http://' + ip + '/123',
+              method: 'GET',
+              forever: true
           };
           promises.push(healthCheck(option, ip));
         }
         Promise.all(promises).then(function(values)
         {
-            console.log('모두성공', values);
-            console.log(exports.chatServerList);
             eventEmitter.emit('healthCheck');
+            console.log(exports.chatServerList);
         }).catch(function(value)
         {
             console.log('실패가 있음', value);
