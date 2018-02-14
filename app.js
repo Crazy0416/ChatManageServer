@@ -78,7 +78,6 @@ function healthCheck(opt, ip)
 
     p.then(function(ip)
     {
-        console.log('정상 서버 : ' + ip);
         exports.chatServerList[ip] = 1;
     }).catch(function(ip)
     {
@@ -107,11 +106,9 @@ eventEmitter.on('healthCheck', function() {
         Promise.all(promises).then(function(values)
         {
             eventEmitter.emit('healthCheck');
-            console.log(exports.chatServerList);
         }).catch(function(value)
         {
             console.log('실패가 있음', value);
-            console.log(exports.chatServerList);
             eventEmitter.emit('healthCheck');
         });
 

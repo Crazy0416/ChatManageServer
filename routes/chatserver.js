@@ -41,11 +41,8 @@ router.get('/count', function (req, res, next) {
                     var _key = Object.keys(reply)[cnt];
                     var _val = parseInt(reply[_key]);
                     console.log(chatServerConfig.chatServerList);
-                    console.log("_key: ", _key);
-                    console.log("_val: ", _val);
                     console.log('chatServerList[_key]: ' + chatServerConfig.chatServerList[_key]);
                     if(chatServerConfig.chatServerList[_key] === 0) {        // 서버가 죽은 경우 넘김
-                        console.log('skip!!!!');
                         cnt++;
                         next();
                     } else {
@@ -54,10 +51,8 @@ router.get('/count', function (req, res, next) {
                             leastCnt = parseInt(reply[leastKey]);
                         }
                         if (leastCnt > _val) {      // 최소값 비
-                            console.log("바꾸기전 최소값 : " + leastCnt);
                             leastCnt = _val;
                             leastKey = _key;
-                            console.log("바꾼 후 최소값 : " + leastCnt);
                         }
                         cnt++;
                         next();
