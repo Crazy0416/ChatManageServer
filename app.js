@@ -7,12 +7,8 @@ var bodyParser = require('body-parser');
 var request = require('request');
 var config = require('./config/chatManageServer');
 var events = require('events');
+var redisClient = require('./modules/redis');
 var eventEmitter = new events.EventEmitter();
-var redis = require('redis');
-redis.createClient({
-    host: config.redis['host'],
-    port: config.redis['port']
-});
 
 var index = require('./routes/index');
 var chatserver = require('./routes/chatserver');
@@ -56,6 +52,27 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+function initChatManage(){
+    var ChatServerList = Object.keys(config.healthCheck);
+    var array = [];
+    console.log("ChatServerList : ", ChatServerList);
+    redisClient.del("ChatServerList", function(err) {
+        if(err) {
+            console.log("redis ServerClientCnt hdel ERROR : ", err);
+        }
+    });
+
+    for(var cnt = 0; cnt < ChatServerList.length; cnt++){
+        array.push(ChatServerList[cnt]);
+        array.push(0);
+    }
+
+    redisClient.hmset('ServerClientCnt', array, function() {
+        console.log("redis ServerClientCnt hmset ok");
+    })
+}
+initChatManage();
 
 function healthCheck(opt, ip)
 {
