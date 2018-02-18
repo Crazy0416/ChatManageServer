@@ -1,13 +1,9 @@
 var express = require('express');
 var router = express.Router();
-var redis = require('redis');
 var async = require('async');
 var config = require('../config/chatManageServer');
 var chatServerConfig = require('../app');
-var redisClient = redis.createClient({
-    host: config.redis['host'],
-    port: config.redis['port']
-});
+var redisClient = require('../modules/redis');
 
 /* GET home page. */
 router.get('/list', function (req, res, next) {
@@ -18,7 +14,7 @@ router.get('/list', function (req, res, next) {
 router.get('/count', function (req, res, next) {
     var tagName = req.cookies.tagName;
 
-    redisClient.select(2, function (err) {
+    redisClient.select(0, function (err) {
         if (err) {
             console.log("Redis select err!! : " + err);
             res.status(500).append("Access-Control-Allow-Origin", "*")
