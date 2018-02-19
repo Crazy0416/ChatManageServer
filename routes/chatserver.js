@@ -85,15 +85,13 @@ router.get('/count', function (req, res, next) {
 });
 
 router.get('/popularChat', function(req,res){
-    var tagName = req.cookies.tagName;
 
-    redisClient.ZREVRANGE(tagName ,0,9,'withscores',function(err,result){
+    redisClient.ZREVRANGE('PopularRoom' ,0,9,'withscores',function(err,result){
         if(err){
             sentry.message(
                 "Redis get error",
                 "GET /chatserver/popularChat",
                 {
-                    note: "tag name : "+tagName,
                     type: "Redis error"
                 }
             );
@@ -106,7 +104,6 @@ router.get('/popularChat', function(req,res){
             });
         }
     });
-
 
 
 });
