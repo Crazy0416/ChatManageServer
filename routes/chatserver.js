@@ -87,7 +87,7 @@ router.get('/count', function (req, res, next) {
 router.get('/popularChat', function(req,res){
     var tagName = req.cookies.tagName;
 
-    resdisClient.ZREVRANGE(tagName ,0,9,'withscores',function(err,result){
+    redisClient.ZREVRANGE(tagName ,0,9,'withscores',function(err,result){
         if(err){
             sentry.message(
                 "Redis get error",
