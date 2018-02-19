@@ -8,6 +8,11 @@ var redisClient = redis.createClient({
     host: config.redis['host'],
     port: config.redis['port']
 });
+var sentry = require('../common/sentry');
+/*
+    Count는 제일 접속자 수 적은 서버 아이피 리턴
+    List는 뭐였지 그 전체 챗 서버 아이피 리턴이었으
+ */
 
 /* GET home page. */
 router.get('/list', function (req, res, next) {
@@ -83,10 +88,37 @@ router.get('/count', function (req, res, next) {
                             });
                     }
                 })
-
             })
         }
     });
 });
+
+router.get('/popularChat', function(req,res){
+    var tagName = req.cookies.tagName;
+
+    resdisClient.ZREVRANGE(tagName ,0,9,'withscores',function(err,result){
+        if(err){
+            sentry.message(
+                "Redis get error",
+                "GET /chatserver/popularChat",
+                {
+                    note: "tag name : "+tagName,
+                    type: "Redis error"
+                }
+            );
+            throw err;
+        }else{
+            console.log('popularChat :', result);
+            res.json({
+                success:true,
+                data:result
+            });
+        }
+    });
+
+
+
+});
+
 
 module.exports = router;
