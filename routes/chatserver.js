@@ -98,9 +98,18 @@ router.get('/popularChat', function(req,res){
             throw err;
         }else{
             console.log('popularChat :', result);
+            var resultObj = [];
+
+            for(var i = 0; i < result.length; i = i+2){
+                var obj = {};
+                obj.name = result[i];
+                obj.value = parseInt(result[i+1]);
+                resultObj.push(obj);
+            }
+
             res.json({
                 success:true,
-                data:result
+                data:resultObj
             });
         }
     });
